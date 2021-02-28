@@ -85,13 +85,13 @@ while True:
         exec(open('eddy3_analyze_eddy_tracks.py').read()) # output of last timestep to csv for web graphics
 
         # uploads results to server
-        session = ftplib.FTP('ftp_ip_add','ftp_user','ftp_pass') # ftp server
-        file = open(fdir + file1,'rb')                  # file to send
-        session.storbinary('STOR ' + file1, file)       # send the file
-        file = open(fdir + file2,'rb')                 
-        session.storbinary('STOR ' + file2, file)     
-        file.close()                                    # close file and FTP
-        session.quit()
+        # session = ftplib.FTP('ftp_ip_add','ftp_user','ftp_pass') # ftp server
+        # file = open(fdir + file1,'rb')                  # file to send
+        # session.storbinary('STOR ' + file1, file)       # send the file
+        # file = open(fdir + file2,'rb')                 
+        # session.storbinary('STOR ' + file2, file)     
+        # file.close()                                    # close file and FTP
+        # session.quit()
         
         
         
