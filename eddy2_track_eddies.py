@@ -16,7 +16,7 @@ din = 'Data/';
 
 # import data directory
 din_data = din + 'analysis_data/'
-dout_data = dout_data + 'km' + str(radar_km_resolution)
+din_data = din_data + 'km' + str(radar_km_resolution) + '/'
 
 # create 'eddy_tracks' directory
 dout_data = din + 'eddy_tracks/'
@@ -145,6 +145,8 @@ for it in range(1,len(ttime)):
     for i in range(0,i_cluster):
         curr_lat_center = eddy_center_lat[it][i];
         curr_lon_center = eddy_center_lon[it][i];
+        print(curr_lat_center)
+        print(curr_lon_center)
         #         currentpos = [x(it,i) y(it,i)];
         #         cur_size = [eigvals1(it,i) eigvals2(it,i)];
         # check over all tracks with timesteps from before
@@ -213,10 +215,10 @@ for it in range(1,len(ttime)):
 total_tracks           = np.array(total_tracks,dtype=object) # eddy center lon/lat
 eddy_center_lat        = np.array(lat_center,dtype=object)
 eddy_center_lon        = np.array(lon_center,dtype=object) # eddy direction, math notation
-eddy_angular_vel       = np.array(ellipse_theta,dtype=object) # angular velocty (deg/sec) math notation of eddy
+eddy_angular_vel       = np.array(omega,dtype=object) # angular velocty (deg/sec) math notation of eddy
 eddy_length_x          = np.array(eig1,dtype=object) # number of streamlines for each eddy
 eddy_length_y          = np.array(eig2,dtype=object) # ellipse fit x length (meters)
-eddy_ellipse_theta     = np.array(omega,dtype=object) # ellipse fit y length (meters)
+eddy_ellipse_theta     = np.array(ellipse_theta,dtype=object) # ellipse fit y length (meters)
 eddy_dir               = np.array(direction,dtype=object) # rotation of eddy ellipse fit, math degrees
 eddy_streamlines       = np.array(num_streams,dtype=object) 
 Time                   = np.array(Time,dtype=object) 

@@ -112,12 +112,13 @@ while file_count < numfiles:
     # region = 'USEGC'
     # nc_time = 11764 # hours since 2019-09-29 20:00:00.000 UTC
     ncout_name = dout_data + region + '_' + str(radar_km_resolution) + 'km_' + str(nc_time) + '.nc' 
-    url = 'http://hfrnet-tds.ucsd.edu/thredds/dodsC/HFR/' + region + '/' + str(radar_km_resolution) +         'km/25hr/RTV/HFRADAR_US_East_and_Gulf_Coast_6km_Resolution_25_Hour_Average_RTV_best.ncd?' +         'lat[0:1:459],lon[0:1:700],time[' + str(nc_time) + '],u_mean[' + str(nc_time) +         '][0:1:459][0:1:700],v_mean[' + str(nc_time) + '][0:1:459][0:1:700]'
+    url = 'http://hfrnet-tds.ucsd.edu/thredds/dodsC/HFR/' + region + '/' + str(radar_km_resolution) +         'km/25hr/RTV/HFRADAR_US_East_and_Gulf_Coast_' + str(radar_km_resolution) + 'km_Resolution_25_Hour_Average_RTV_best.ncd?' +         'lat[0:1:459],lon[0:1:700],time[' + str(nc_time) + '],u_mean[' + str(nc_time) +         '][0:1:459][0:1:700],v_mean[' + str(nc_time) + '][0:1:459][0:1:700]'
     
     try:
         ncin = Dataset(url)
     except OSError:
         print('file does not exist or website down')
+        print(url)
         break
     
     lon = ncin.variables['lon'][:]
@@ -138,7 +139,7 @@ while file_count < numfiles:
     
     
 
-
+    
     # print(t)
     lons,lats = np.meshgrid(lon, lat)
     u1 = np.squeeze(u)                     
@@ -353,6 +354,10 @@ while file_count < numfiles:
                     # streamline center
                     streamsx_center.append(np.mean(stline_x[0:ii+1]));
                     streamsy_center.append(np.mean(stline_y[0:ii+1]));
+#                    print(stline_x[0:ii+1])
+#                    print(stline_y[0:ii+1])
+#                    print(np.mean(stline_x[0:ii+1]))
+#                    print(np.mean(stline_y[0:ii+1]))
                     
                     # winding direction
                     winding_dir.append(dir1); # % math notation
@@ -381,6 +386,8 @@ while file_count < numfiles:
                                                   streamsy_center[i_streams],ZONE_start,ZONE_start_str);
                     streams_center_lat.append(streams_center_lat1)
                     streams_center_lon.append(streams_center_lon1)
+#                    print(streams_center_lon1)
+#                    print(streams_center_lat1)
                     
                     streams_ZONE.append(ZONE_start);
                     streams_ZONE_str.append(ZONE_start_str);
@@ -528,12 +535,16 @@ while file_count < numfiles:
                 ptsx = np.concatenate((ptsx,streamsx))
                 ptsy = np.concatenate((ptsy,streamsy))
             
+#        print(zone_eddy)
+#        print(zone_eddy_str)
+#        print(zone_a)
+#        print(zona_a_str)
         eddy_center_x.append(np.mean(ptsx))
         eddy_center_y.append(np.mean(ptsy))
         eddy_center_lat1,eddy_center_lon1 = utm.to_latlon(eddy_center_x[eddies-1],
                                         eddy_center_y[eddies-1],zone_eddy,zone_eddy_str)
         eddy_center_lat.append(eddy_center_lat1)
-        eddy_center_lon.append(streams_center_lon1)
+        eddy_center_lon.append(eddy_center_lon1)
         eddy_dir.append(winding_dir[k[0][0]])
         eddy_angular_vel.append(np.mean(eddy_angular_vel1)); # % avg angular velocity in deg/s
         eddy_streamlines.append(len(k));
