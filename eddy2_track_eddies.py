@@ -56,7 +56,7 @@ for x in files:
     if x.find(str(radar_km_resolution) + 'km') < 0: # resolution selection
         continue
     
-    print(x) # print filename
+#    print(x) # print filename
     
     # read nc data
     ncin_name = din_data + x
@@ -134,19 +134,19 @@ for i in range(0,i_cluster):
 
 # 
 total_tracks = i_cluster;
-print('Starting track finding routine')
-print('Total number of timestep to analyze = ' + str(len(ttime)))
-print('Timestep = ' + str(it))
+#print('Starting track finding routine')
+#print('Total number of timestep to analyze = ' + str(len(ttime)))
+#print('Timestep = ' + str(it))
 
 # track the same eddies
 for it in range(1,len(ttime)):
-    print('Timestep = ' + str(it))
+#    print('Timestep = ' + str(it))
     i_cluster = len(eddy_center_lat[it]); # number of eddies at this timestep
     for i in range(0,i_cluster):
         curr_lat_center = eddy_center_lat[it][i];
         curr_lon_center = eddy_center_lon[it][i];
-        print(curr_lat_center)
-        print(curr_lon_center)
+#        print(curr_lat_center)
+#        print(curr_lon_center)
         #         currentpos = [x(it,i) y(it,i)];
         #         cur_size = [eigvals1(it,i) eigvals2(it,i)];
         # check over all tracks with timesteps from before
@@ -181,7 +181,7 @@ for it in range(1,len(ttime)):
                     direction[i1]   = np.append(direction[i1] , eddy_dir[it][i])  # +1 is cyclonic, -1 is anticyclonic
                     num_streams[i1] = np.append(num_streams[i1] , eddy_streamlines[it][i])  # intensity
                     Time[i1]        = np.append(Time[i1] , ttime[it])
-                    print('Time gaps away = ' + str(timegap[i1]))
+#                    print('Time gaps away = ' + str(timegap[i1]))
                     timegap[i1]     = 0; # zero because it's gonna add one right after this loop
                     succ = 1;
                     break; # do not combine more than 2 tracks

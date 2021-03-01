@@ -104,7 +104,7 @@ while file_count < numfiles:
     # fig_name = dout_fig + x[0:-3]
     # ncin = Dataset(ncin_name, mode='r')
     
-    print(nc_time)
+    print('running analysis on file ' + str(nc_time))
     fig_name = dout_fig + region + '_' + str(radar_km_resolution) + 'km_' + str(nc_time)
     
 #     # testing 25 hr opendap dataset
@@ -115,12 +115,14 @@ while file_count < numfiles:
     url = 'http://hfrnet-tds.ucsd.edu/thredds/dodsC/HFR/' + region + '/' + str(radar_km_resolution) +         'km/25hr/RTV/HFRADAR_US_East_and_Gulf_Coast_' + str(radar_km_resolution) + 'km_Resolution_25_Hour_Average_RTV_best.ncd?' +         'lat[0:1:459],lon[0:1:700],time[' + str(nc_time) + '],u_mean[' + str(nc_time) +         '][0:1:459][0:1:700],v_mean[' + str(nc_time) + '][0:1:459][0:1:700]'
     
     try:
+        print('downloading data ...')
         ncin = Dataset(url)
     except OSError:
         print('file does not exist or website down')
         print(url)
         break
     
+    print('running eddy analysis ...')
     lon = ncin.variables['lon'][:]
     lat = ncin.variables['lat'][:]
     t = ncin.variables['time'][:] # hours since 2019-09-29 20:00:00.000 UTC
@@ -341,11 +343,11 @@ while file_count < numfiles:
                 if eddy == 1 and ii > min_pts - 2:
                     i_streams = i_streams + 1;
                     # print(ii)
-                    if debug_info == 1:
-                        if i_streams < 1:
-                            print('found ' + str(i_streams + 1) + ' winding streamline!')
-                        else:
-                            print('found ' + str(i_streams + 1) + ' winding streamlines!')
+#                    if debug_info == 1:
+#                        if i_streams < 1:
+#                            print('found ' + str(i_streams + 1) + ' winding streamline!')
+#                        else:
+#                            print('found ' + str(i_streams + 1) + ' winding streamlines!')
                  
                     # streamline points
                     streamsx.append(stline_x[0:ii+1]); # % up to last pt before break
