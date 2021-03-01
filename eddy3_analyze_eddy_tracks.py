@@ -101,25 +101,25 @@ for tracki in range(0,int(total_tracks)):
 
         if eddy_center_lon[tracki].size > 1: # eddy has a history or future from this timestep
             # positions 
-            lons = eddy_center_lon[tracki][0:timei+1]
-            lats = eddy_center_lat[tracki][0:timei+1]
-            print(eddy_center_lon[tracki][0:timei+1]) #  -- past until this timestep
-            print(eddy_center_lat[tracki][0:timei+1]) #  -- past until this timestep
+            lons = np.around(eddy_center_lon[tracki][0:timei+1],5)
+            lats = np.around(eddy_center_lat[tracki][0:timei+1],5)
+#            print(lons) #  -- past until this timestep
+#            print(lats) #  -- past until this timestep
             
             # eddy size for this timestep
-            avel = eddy_angular_vel[tracki][timei]
-            lx = eddy_length_x[tracki][timei]
-            ly = eddy_length_y[tracki][timei]
-            th = eddy_ellipse_theta[tracki][timei]
+            avel = np.around(eddy_angular_vel[tracki][timei],5)
+            lx = np.around(eddy_length_x[tracki][timei])
+            ly = np.around(eddy_length_y[tracki][timei])
+            th = np.around(eddy_ellipse_theta[tracki][timei])
             direc = eddy_dir[tracki][timei]
             streamlines = eddy_streamlines[tracki][timei]
-            
-            print(eddy_angular_vel[tracki][timei])
-            print(eddy_length_x[tracki][timei])
-            print(eddy_length_y[tracki][timei])
-            print(eddy_ellipse_theta[tracki][timei])
-            print(eddy_dir[tracki][timei])
-            print(eddy_streamlines[tracki][timei])
+#            
+#            print(avel)
+#            print(lx)
+#            print(ly)
+#            print(th)
+#            print(eddy_dir[tracki][timei])
+#            print(eddy_streamlines[tracki][timei])
             
             
             with open(csv_out_name_junk, 'w', newline='') as csvfile:
@@ -145,14 +145,14 @@ for tracki in range(0,int(total_tracks)):
 
         else: # eddy only exists at this timestep
             # positions 
-            lons = eddy_center_lon[tracki]
-            lats = eddy_center_lat[tracki]
+            lons = np.around(eddy_center_lon[tracki],5)
+            lats = np.around(eddy_center_lat[tracki],5)
             
             # eddy size for this timestep
-            avel = eddy_angular_vel[tracki]
-            lx = eddy_length_x[tracki]
-            ly = eddy_length_y[tracki]
-            th = eddy_ellipse_theta[tracki]
+            avel = np.around(eddy_angular_vel[tracki],5)
+            lx = np.around(eddy_length_x[tracki])
+            ly = np.around(eddy_length_y[tracki])
+            th = np.around(eddy_ellipse_theta[tracki])
             direc = eddy_dir[tracki]
             streamlines = eddy_streamlines[tracki]
             
@@ -165,17 +165,17 @@ for tracki in range(0,int(total_tracks)):
             
             
             # positions 
-            print(eddy_center_lon[tracki])
-            print(eddy_center_lat[tracki])
+#            print(lons) #  -- past until this timestep
+#            print(lats) #  -- past until this timestep
             
             # eddy size for this timestep
-            print(eddy_angular_vel[tracki])
-            print(eddy_length_x[tracki])
-            print(eddy_length_y[tracki])
-            print(eddy_ellipse_theta[tracki])
-            print(eddy_dir[tracki])
-            print(eddy_streamlines[tracki])
+#            print(avel)
+#            print(lx)
+#            print(ly)
+#            print(th)
+#            print(eddy_dir[tracki])
+#            print(eddy_streamlines[tracki])
 
-    else:
-        print('this time not in this track')
+#    else:
+#        print('this time not in this track')
 
