@@ -90,14 +90,14 @@ while True:
     
     
     # uploads results to server
-    print('sending results')
-    session = ftplib.FTP('ftp_ip_address','ftp_user','ftp_pass') # ftp server
-    file = open(fdir + file1,'rb')                  # file to send
-    session.storbinary('STOR ' + file1, file)       # send the file
-    file = open(fdir + file2,'rb')                 
-    session.storbinary('STOR ' + file2, file)     
-    file.close()                                    # close file and FTP
-    session.quit()
+    # print('sending results')
+    # session = ftplib.FTP('ftp_ip_address','ftp_user','ftp_pass') # ftp server
+    # file = open(fdir + file1,'rb')                  # file to send
+    # session.storbinary('STOR ' + file1, file)       # send the file
+    # file = open(fdir + file2,'rb')                 
+    # session.storbinary('STOR ' + file2, file)     
+    # file.close()                                    # close file and FTP
+    # session.quit()
     
         
     print('sleep for ' + str(sleeptime) + ' minutes ...') 
