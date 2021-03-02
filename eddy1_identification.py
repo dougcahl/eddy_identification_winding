@@ -12,21 +12,21 @@ Created on Thu Nov  5 12:03:02 2020
 din = 'Data/' # '2017/' # directory of netcdf files to process/save
 # dout = '/home/doug/Documents/MATLAB/eddy/data/eddy_analysis_py/'
 # debug_plot  = 1 # % debug plots
-debug_info  = 1 # print when eddy is found for each streamline
+#debug_info  = 1 # print when eddy is found for each streamline
 # numfiles    = 1 # % how many files to run. Set to 0 to run all files
-
+#
 #radar_km_resolution = 6         #% 1, 2 or 6 km nc file
-res_x_mult          = 1         #% for higher resolution, if >1 results in this squared processing time (i.e. 3 => 9 times longer), only implemented in Matlab
-winding_thres       = 270       #% how much winding (in degrees) to be a eddy
-d_thres             = 25        #% streamline starting and ending max distance in km
-baddir_thres        = 15        #% breaks at 15 degrees of bad dirs
-param_center_dist   = 25        #% how many km are clusters together
-min_pts             = 5         # min number of grid points streamline has
-
+#res_x_mult          = 1         #% for higher resolution, if >1 results in this squared processing time (i.e. 3 => 9 times longer), only implemented in Matlab
+#winding_thres       = 270       #% how much winding (in degrees) to be a eddy
+#d_thres             = 25        #% streamline starting and ending max distance in km
+#baddir_thres        = 15        #% breaks at 15 degrees of bad dirs
+#param_center_dist   = 25        #% how many km are clusters together
+#min_pts             = 5         # min number of grid points streamline has
+#
 # % utm grid size for streamlines (ex. 1x1 grid is about 100km x 100km )
-grid_deg_size = 2;
-
-region = 'USEGC'
+#grid_deg_size = 2;
+#
+#region = 'USEGC'
 # nc_time = 11764 # hours since 2019-09-29 20:00:00.000 UTC
 # nc_time_start = 11800 # 2021-1-31 21:00:00 UTC
 # nc_time_start = 12000 # 2021-1-31 21:00:00 UTC
@@ -597,6 +597,8 @@ while file_count < numfiles:
             plt.plot(ptslon,ptslat,'r.')
             plt.savefig(fig_name + '_eddy_' + str(eddies) + '.png')
             plt.close(fig)
+#            print(eddy_center_lon1)
+#            print(eddy_center_lat1)
     
         
     # %% streamlines for each eddy we found
