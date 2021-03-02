@@ -7,8 +7,8 @@ Created on Thu Nov  5 12:03:02 2020
 """
 #radar_km_resolution = 6;    # 1, 2 or 6 km nc file 
 
-eddy_track_dist_param = 50; # 4.0; % distance in km for eddy to be continuation
-eddy_track_time_param = 5; # how many hours can there be between identified eddies for it to be considered the same eddy
+#eddy_track_dist_param = 25; # 4.0; % distance in km for eddy to be continuation
+#eddy_track_time_param = 5; # how many hours can there be between identified eddies for it to be considered the same eddy
 
 
 # directory root
@@ -62,6 +62,7 @@ for x in files:
     ncin_name = din_data + x
     ncin = Dataset(ncin_name, mode='r') # open nc file
     
+    
     # get data
     eddy_center_lat.append(np.array(ncin.variables['eddy_center_lat'][:]))
     eddy_center_lon.append(np.array(ncin.variables['eddy_center_lon'][:]))
@@ -73,6 +74,7 @@ for x in files:
     eddy_ellipse_theta.append(np.array(ncin.variables['eddy_ellipse_theta'][:]))
     eddies = len(np.array(ncin.variables['eddy_dir'][:]))
     ncin.close() # close nc file
+    
     
     # timestamp of file
     # yyyy,    mm,    dd,     HH,    MM
@@ -87,6 +89,8 @@ for x in files:
     total_eddies = total_eddies + eddies # total eddies found
 
 
+#print(eddy_center_lon)
+#print(eddy_center_lat)
 # if not on first timestep
 # check each eddy on this timestep for distance from previous eddies
 # if distance < eddy_track_dist_param

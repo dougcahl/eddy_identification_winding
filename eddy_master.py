@@ -38,6 +38,18 @@ while True:
 
     
     radar_km_resolution = 6         #% 1, 2 or 6 km nc file
+    eddy_track_dist_param = 25; # 4.0; % distance in km for eddy to be continuation
+    eddy_track_time_param = 5; # how many hours can there be between identified eddies for it to be considered the same eddy
+    debug_info  = 1 # print when eddy is found for each streamline
+    res_x_mult          = 1         #% for higher resolution, if >1 results in this squared processing time (i.e. 3 => 9 times longer)
+    winding_thres       = 270       #% how much winding (in degrees) to be a eddy
+    d_thres             = 25        #% streamline starting and ending max distance in km
+    baddir_thres        = 15        #% breaks at 15 degrees of bad dirs
+    param_center_dist   = 25        #% how many km are clusters together
+    min_pts             = 5         # min number of grid points streamline has
+    # % utm grid size for streamlines (ex. 1x1 grid is about 100km x 100km )
+    grid_deg_size = 2;
+    region = 'USEGC'
 
 
     # directory where hf currents are saved
@@ -87,11 +99,11 @@ while True:
     exec(open('eddy1_identification.py').read()) # does eddy analysis and debug plots
     exec(open('eddy2_track_eddies.py').read()) # tracks the eddys through time
     exec(open('eddy3_analyze_eddy_tracks.py').read()) # output of last timestep to csv for web graphics
-    
+#    break
     
     # uploads results to server
     # print('sending results')
-    # session = ftplib.FTP('ftp_ip_address','ftp_user','ftp_pass') # ftp server
+    # session = ftplib.FTP('ftp_ip_addr','ftp_user','ftp_passwd') # ftp server
     # file = open(fdir + file1,'rb')                  # file to send
     # session.storbinary('STOR ' + file1, file)       # send the file
     # file = open(fdir + file2,'rb')                 

@@ -8,8 +8,8 @@ Created on Thu Nov  5 12:03:02 2020
 
 #radar_km_resolution = 6;    # 1, 2 or 6 km nc file 
 
-eddy_track_dist_param = 50; # 4.0; % distance in km for eddy to be continuation
-eddy_track_time_param = 5; # how many hours can there be between identified eddies for it to be considered the same eddy
+#eddy_track_dist_param = 25; # 4.0; % distance in km for eddy to be continuation
+#eddy_track_time_param = 5; # how many hours can there be between identified eddies for it to be considered the same eddy
 
 
 # directory root
@@ -64,7 +64,7 @@ for tracki in range(0,int(total_tracks)):
     time_latest = np.maximum(timetest,time_latest)   
 
 
-
+print('last eddy found on ' + str(time_latest))
 
 
 with open(csv_out_name_junk, 'w', newline='') as csvfileout:
@@ -124,7 +124,7 @@ for tracki in range(0,int(total_tracks)):
             
             with open(csv_out_name_junk, 'w', newline='') as csvfile:
                 spamwriter = csv.writer(csvfile, delimiter=',')
-                spamwriter.writerow([lons[0],lats[0],
+                spamwriter.writerow([lons[-1],lats[-1],
                                     avel,lx,ly,th,direc,streamlines])
             
             
@@ -133,9 +133,9 @@ for tracki in range(0,int(total_tracks)):
                 row1 = csv.reader(csvfilein, delimiter=',')
                 for row in row1:
                     for i in range(0,lons.size-1):
-                        rowlon = lons[i+1]
+                        rowlon = lons[-i-1]
                         row.append(rowlon)
-                        rowlat = lats[i+1]
+                        rowlat = lats[-i-1]
                         row.append(rowlat)
                     spamwriter.writerow(row)
         
