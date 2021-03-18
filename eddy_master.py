@@ -17,10 +17,11 @@ from netCDF4 import Dataset  # http://code.google.com/p/netcdf4-python/
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 import utm
-import sys  
+import sys
 from streamplot_dc import streamplot_dc # custom streamplot function that only calculates a single stream line
 import csv
 import urllib.request
+from scipy.io import savemat
 
 sleeptime = 10 # sleep between analysis in minutes
 
@@ -37,7 +38,7 @@ while True:
 #        if i_km == 2:
 #            radar_km_resolution = 1         #% 1, 2 or 6 km nc file
 
-  
+
     avg_25hr                = 1         # set to 0 to use hourly currents. set to 1 for 25 hour average currents
     radar_km_resolution     = 6         # 1, 2 or 6 km nc file, does not support west coast 500m
     eddy_track_dist_param   = 25        # 4.0; % distance in km for eddy to be continuation
@@ -50,7 +51,7 @@ while True:
     param_center_dist       = 25        # how many km are clusters together
     min_pts                 = 5         # min number of grid points streamline has
     grid_deg_size           = 2         # utm grid size for streamlines (ex. 1x1 grid is about 100km x 100km )
-  
+
     ### region selection
     region = 'USEGC'    # 1,2,6 km
     fullregionname = 'HFRADAR_US_East_and_Gulf_Coast'
@@ -70,14 +71,25 @@ while True:
 #    region = 'PRVI'     # 2,6 km
 #    fullregionname = 'HFRADAR_Puerto_Rico_and_the_US_Virgin_Islands'
 
+    if avg_25hr == 1:
+        hrname = '25hr'
+    else:
+        hrname = 'hourly'
 
-	# create Data directory if missing
+
+    # create Data directory if missing
     din = 'Data/' # fiename in hours since 2019-09-29 20:00:00.000 UTC
     if not os.path.isdir(din):
         os.mkdir(din) # create directory
 
     # directory where hf currents are saved
     din = 'Data/analysis_data/' # fiename in hours since 2019-09-29 20:00:00.000 UTC
+    if not os.path.isdir(din):
+        os.mkdir(din) # create directory
+    din = din + region + '/'
+    if not os.path.isdir(din):
+        os.mkdir(din) # create directory
+    din = din + hrname + '/'
     if not os.path.isdir(din):
         os.mkdir(din) # create directory
     din = din + 'km' + str(radar_km_resolution) + '/'
@@ -88,35 +100,44 @@ while True:
     fdir = 'Data/eddy_tracks/'
     if not os.path.isdir(fdir):
         os.mkdir(fdir) # create directory
+    fdir = fdir + region + '/'
+    if not os.path.isdir(fdir):
+        os.mkdir(fdir) # create directory
+    fdir = fdir + hrname + '/'
+    if not os.path.isdir(fdir):
+        os.mkdir(fdir) # create directory
     fdir = fdir + 'km' + str(radar_km_resolution) + '/'
     if not os.path.isdir(fdir):
         os.mkdir(fdir) # create directory
 
-    file1 = 'eddy_tracks_' + str(radar_km_resolution) + 'km.csv'
-    file2 = 'eddy_tracks_' + str(radar_km_resolution) + 'km.npz'
-    
+    file1 = region + '_eddy_tracks_' + str(radar_km_resolution) + 'km.csv'
+    file2 = region + '_eddy_tracks_' + str(radar_km_resolution) + 'km.npz'
+
     now = datetime.datetime.utcnow()
     start = datetime.datetime(2019,9,29)
-    diff = now - start 
+    diff = now - start
     days, seconds = diff.days, diff.seconds
     hours_now = days * 24 + seconds // 3600
     hours_now = hours_now - 20; # change to hours_now = hours_now - 20-100;
-    
+
+
+    print('current time = ' + str(hours_now))
+    print('25 hr average 12.5 hours behind')
+
 
     files = sorted(os.listdir(din))
     if len(files) == 0:
         numfiles = 1
         nc_time_start = hours_now - 20
+        print('first run, starting 20 hours back')
     else:
         lastfile = files[-1]
         lasthr = int(lastfile[-8:-3]) # most recent file
         nc_time_start = lasthr + 1
         numfiles = hours_now - lasthr
-    
-    print('current time = ' + str(hours_now))
-    print('25 hr average 12.5 hours behind')
-    print('last file +1 = ' + str(nc_time_start))
-    print('catchup num  = ' + str(numfiles))
+        print('last file +1 = ' + str(nc_time_start))
+        print('catchup num  = ' + str(numfiles))
+
 #    numfiles = 1
 
 
@@ -124,23 +145,20 @@ while True:
     exec(open('eddy2_track_eddies.py').read()) # tracks the eddys through time
     exec(open('eddy3_analyze_eddy_tracks.py').read()) # output of last timestep to csv for web graphics
 #    break
-    
+
     # uploads results to server
-    print('sending results')
+    # print('sending results')
     # try:
-        # session = ftplib.FTP('i','ftp_user','ftp_pass') # ftp server
-        # file = open(fdir + file1,'rb')                  # file to send
-        # session.storbinary('STOR ' + file1, file)       # send the file
-        # file = open(fdir + file2,'rb')                 
-        # session.storbinary('STOR ' + file2, file)     
-        # file.close()                                    # close file and FTPsession = ftplib.FTP('104.128.235.148','ftp_home','homehome') 
-        # session.quit()
+    #     session = ftplib.FTP('ftp_ip','ftpuser','ftp_pass') # ftp server
+    #     file = open(fdir + file1,'rb')                  # file to send
+    #     session.storbinary('STOR ' + file1, file)       # send the file
+    #     file = open(fdir + file2,'rb')
+    #     session.storbinary('STOR ' + file2, file)
+    #     file.close()                                    # close file and FTPsession = ftplib.FTP('104.128.235.148','ftp_home','homehome')
+    #     session.quit()
     # except:
-        # print('ftp server down, no results going to webserver')
-    
-        
-    print('sleep for ' + str(sleeptime) + ' minutes ...') 
+    #     print('ftp server down, no results going to webserver')
+
+
+    print('sleep for ' + str(sleeptime) + ' minutes ...')
     time.sleep(60*sleeptime) # sleep until next run
-
-
-
