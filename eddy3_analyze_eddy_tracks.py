@@ -17,18 +17,15 @@ din = 'Data/';
 
 # create 'eddy_tracks' directory
 din_data = din + 'eddy_tracks/'
+din_data = din_data + region + '/'
+din_data = din_data + hrname + '/'
 din_data = din_data + 'km' + str(radar_km_resolution) + '/'
 
 
-
-if not os.path.isdir(din_data):
-    os.mkdir(din_data) # create directory
-
-
 # ncout_name = din_data + 'eddy_tracks_' + str(radar_km_resolution) + 'km.nc'
-npz_in_name = din_data + 'eddy_tracks_' + str(radar_km_resolution) + 'km.npz'
-csv_out_name = din_data + 'eddy_tracks_' + str(radar_km_resolution) + 'km.csv'
-csv_out_name_junk = din_data + 'eddy_tracks_' + str(radar_km_resolution) + 'km_junk.csv'
+npz_in_name = din_data + region + '_eddy_tracks_' + str(radar_km_resolution) + 'km.npz'
+csv_out_name = din_data + region + '_eddy_tracks_' + str(radar_km_resolution) + 'km.csv'
+csv_out_name_junk = din_data + region + '_eddy_tracks_' + str(radar_km_resolution) + 'km_junk.csv'
 
 
 

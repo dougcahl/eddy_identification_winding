@@ -16,6 +16,8 @@ din = 'Data/';
 
 # import data directory
 din_data = din + 'analysis_data/'
+din_data = din_data + region + '/'
+din_data = din_data + hrname + '/'
 din_data = din_data + 'km' + str(radar_km_resolution) + '/'
 
 # create 'eddy_tracks' directory
@@ -24,12 +26,21 @@ if not os.path.isdir(dout_data):
     os.mkdir(dout_data) # create directory
 
 # save data directory for year
+dout_data = dout_data + region + '/'
+if not os.path.isdir(dout_data):
+    os.mkdir(dout_data) # create directory
+
+dout_data = dout_data + hrname + '/'
+if not os.path.isdir(dout_data):
+    os.mkdir(dout_data) # create directory
+
 dout_data = dout_data + 'km' + str(radar_km_resolution) + '/'
 if not os.path.isdir(dout_data):
     os.mkdir(dout_data) # create directory
 
 # ncout_name = dout_data + 'eddy_tracks_' + str(radar_km_resolution) + 'km.nc'
-npz_out_name = dout_data + 'eddy_tracks_' + str(radar_km_resolution) + 'km.npz'
+npz_out_name = dout_data + region + '_eddy_tracks_' + str(radar_km_resolution) + 'km.npz'
+mat_out_name = dout_data + region + '_eddy_tracks_' + str(radar_km_resolution) + 'km.mat'
 
 # identified eddies for it to be considered the same eddy
 files = sorted(os.listdir(din_data)) # get filenames
@@ -230,6 +241,21 @@ Time                   = np.array(Time,dtype=object)
 eddy_track_dist_param  = np.array(eddy_track_dist_param,dtype=object) 
 eddy_track_time_param  = np.array(eddy_track_time_param,dtype=object) 
 
+Time_mat = []
+for i in range(0,Time.size):
+    Time_1 = Time[i]
+    Time_mat2 = []
+    for j in range(0,Time_1.size):
+        if Time_1.size == 1:
+            Time_2 = Time_1.tolist()
+        else:
+            Time_2 = Time_1[j]
+        Time_mat2.append(Time_2.strftime("%d-%b-%Y %H:%M:%S"))
+        #        Time_mat[i][j] = Time_2.strftime("%d-%b-%Y %H:%M:%S")
+    Time_mat.append(Time_mat2)
+
+
+    
 
 np.savez(npz_out_name, 
          total_tracks          = total_tracks,
@@ -247,6 +273,23 @@ np.savez(npz_out_name,
 
 # a = np.load('/home/doug/Documents/MATLAB/eddy/data/eddy_tracks/2017/eddy_tracks_6km.npz', allow_pickle=True)
 
+
+
+
+mdic = {"total_tracks": total_tracks, 
+         "eddy_center_lat": eddy_center_lat,
+         "eddy_center_lon": eddy_center_lon,
+         "eddy_angular_vel": eddy_angular_vel,
+         "eddy_length_x": eddy_length_x,
+         "eddy_length_y": eddy_length_y,
+         "eddy_ellipse_theta": eddy_ellipse_theta,
+         "eddy_dir": eddy_dir,
+         "eddy_streamlines": eddy_streamlines,
+         "Time": Time_mat,
+         "eddy_track_dist_param": eddy_track_dist_param,
+         "eddy_track_time_param": eddy_track_time_param }
+
+savemat(mat_out_name, mdic) # save .mat file
 
 
 
