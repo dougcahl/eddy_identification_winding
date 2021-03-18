@@ -71,6 +71,10 @@ while True:
 #    fullregionname = 'HFRADAR_Puerto_Rico_and_the_US_Virgin_Islands'
 
 
+	# create Data directory if missing
+    din = 'Data/' # fiename in hours since 2019-09-29 20:00:00.000 UTC
+    if not os.path.isdir(din):
+        os.mkdir(din) # create directory
 
     # directory where hf currents are saved
     din = 'Data/analysis_data/' # fiename in hours since 2019-09-29 20:00:00.000 UTC
