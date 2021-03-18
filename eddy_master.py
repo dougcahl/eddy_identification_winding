@@ -20,10 +20,11 @@ import utm
 import sys  
 from streamplot_dc import streamplot_dc # custom streamplot function that only calculates a single stream line
 import csv
+import urllib.request
 
 sleeptime = 10 # sleep between analysis in minutes
 
-debug_plot = 1 # change to 0 when deployed
+debug_plot = 0 # change to 0 when deployed
 
 
 
@@ -36,20 +37,39 @@ while True:
 #        if i_km == 2:
 #            radar_km_resolution = 1         #% 1, 2 or 6 km nc file
 
-    
-    radar_km_resolution = 6         #% 1, 2 or 6 km nc file
-    eddy_track_dist_param = 25; # 4.0; % distance in km for eddy to be continuation
-    eddy_track_time_param = 5; # how many hours can there be between identified eddies for it to be considered the same eddy
-    debug_info  = 1 # print when eddy is found for each streamline
-    res_x_mult          = 1         #% for higher resolution, if >1 results in this squared processing time (i.e. 3 => 9 times longer)
-    winding_thres       = 270       #% how much winding (in degrees) to be a eddy
-    d_thres             = 25        #% streamline starting and ending max distance in km
-    baddir_thres        = 15        #% breaks at 15 degrees of bad dirs
-    param_center_dist   = 25        #% how many km are clusters together
-    min_pts             = 5         # min number of grid points streamline has
-    # % utm grid size for streamlines (ex. 1x1 grid is about 100km x 100km )
-    grid_deg_size = 2;
-    region = 'USEGC'
+  
+    avg_25hr                = 1         # set to 0 to use hourly currents. set to 1 for 25 hour average currents
+    radar_km_resolution     = 6         # 1, 2 or 6 km nc file, does not support west coast 500m
+    eddy_track_dist_param   = 25        # 4.0; % distance in km for eddy to be continuation
+    eddy_track_time_param   = 5         # how many hours can there be between identified eddies for it to be considered the same eddy
+    debug_info              = 1         # print when eddy is found for each streamline
+    res_x_mult              = 1         # for higher resolution, if >1 results in this squared processing time (i.e. 3 => 9 times longer)
+    winding_thres           = 270       # how much winding (in degrees) to be a eddy
+    d_thres                 = 25        # streamline starting and ending max distance in km
+    baddir_thres            = 15        # breaks at 15 degrees of bad dirs
+    param_center_dist       = 25        # how many km are clusters together
+    min_pts                 = 5         # min number of grid points streamline has
+    grid_deg_size           = 2         # utm grid size for streamlines (ex. 1x1 grid is about 100km x 100km )
+  
+    ### region selection
+    region = 'USEGC'    # 1,2,6 km
+    fullregionname = 'HFRADAR_US_East_and_Gulf_Coast'
+
+#    region = 'GAK'      # 1,2,6 km
+#    fullregionname = 'HFRADAR_US_Gulf_of_Alaska'
+#
+#    region = 'AKNS'     # 6 km
+#    fullregionname = 'HFRADAR_Alaska_-_North_Slope'
+#
+#    region = 'USWC'     # 500m 1,2,6 km (500m is not supported)
+#    fullregionname = 'HFRADAR_US_West_Coast'
+#
+#    region = 'USHI'     # 1,2,6 km
+#    fullregionname = 'HFRADAR_US_Hawaii'
+#
+#    region = 'PRVI'     # 2,6 km
+#    fullregionname = 'HFRADAR_Puerto_Rico_and_the_US_Virgin_Islands'
+
 
 
     # directory where hf currents are saved
@@ -102,14 +122,17 @@ while True:
 #    break
     
     # uploads results to server
-    # print('sending results')
-    # session = ftplib.FTP('ftp_ip_addr','ftp_user','ftp_passwd') # ftp server
-    # file = open(fdir + file1,'rb')                  # file to send
-    # session.storbinary('STOR ' + file1, file)       # send the file
-    # file = open(fdir + file2,'rb')                 
-    # session.storbinary('STOR ' + file2, file)     
-    # file.close()                                    # close file and FTP
-    # session.quit()
+    print('sending results')
+    # try:
+        # session = ftplib.FTP('i','ftp_user','ftp_pass') # ftp server
+        # file = open(fdir + file1,'rb')                  # file to send
+        # session.storbinary('STOR ' + file1, file)       # send the file
+        # file = open(fdir + file2,'rb')                 
+        # session.storbinary('STOR ' + file2, file)     
+        # file.close()                                    # close file and FTPsession = ftplib.FTP('104.128.235.148','ftp_home','homehome') 
+        # session.quit()
+    # except:
+        # print('ftp server down, no results going to webserver')
     
         
     print('sleep for ' + str(sleeptime) + ' minutes ...') 

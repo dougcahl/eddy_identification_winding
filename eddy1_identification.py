@@ -107,19 +107,97 @@ while file_count < numfiles:
     print('running analysis on file ' + str(nc_time))
     fig_name = dout_fig + region + '_' + str(radar_km_resolution) + 'km_' + str(nc_time)
     
-#     # testing 25 hr opendap dataset
+
+    # url name stuff
+    # fullregionname = 'HFRADAR_US_East_and_Gulf_Coast'
+    if avg_25hr == 1:
+        hr_name = '25hr'
+        hr_name_full = '25_Hour_Average'
+        uname = 'u_mean'
+        vname = 'v_mean'
+    else:
+        hr_name = 'hourly'
+        hr_name_full = 'Hourly'
+        uname = 'u'
+        vname = 'v'
+
+
+    url1 = 'http://hfrnet-tds.ucsd.edu/thredds/dodsC/HFR/' + region + \
+    '/' + str(radar_km_resolution) + \
+    'km/' + hr_name + \
+    '/RTV/' + fullregionname + \
+    '_' + str(radar_km_resolution) + \
+     'km_Resolution_' + hr_name_full + \
+    '_RTV_best.ncd.html'
+
+#    print(url1)
+
+
+
+
+    # get data set lat lon size
+    fp = urllib.request.urlopen(url1)
+    mybytes = fp.read()
+    mystr = mybytes.decode("utf8")
+    fp.close()
+
+    # print(mystr)
+    # Float32 lat[lat = 1380];
+    # Float32 lon[lon = 2103];
+    i_str = mystr.find('Float32 lat[lat = ')
+    mystr1 = mystr[i_str+18:i_str+30];
+    i_str = mystr1.find('];')
+    latnum = int(mystr1[0:i_str])
+
+    i_str = mystr.find('Float32 lon[lon = ')
+    mystr1 = mystr[i_str+18:i_str+30];
+    i_str = mystr1.find('];')
+    lonnum = int(mystr1[0:i_str])
+
+#    print(latnum)    
+#    print(lonnum)
+
+
+    # opendap data
+    url = 'http://hfrnet-tds.ucsd.edu/thredds/dodsC/HFR/' + region + \
+    '/' + str(radar_km_resolution) + \
+    'km/' + hr_name + \
+    '/RTV/' + fullregionname + \
+    '_' + str(radar_km_resolution) + \
+     'km_Resolution_' + hr_name_full + \
+    '_RTV_best.ncd?' + 'lat[0:1:' + str(latnum-1) + \
+    '],lon[0:1:' + str(lonnum-1) + \
+    '],time[' + str(nc_time) + \
+    '],' + uname + \
+    '[' + str(nc_time) + \
+    '][0:1:' + str(latnum-1) + \
+    '][0:1:' + str(lonnum-1) + \
+    '],' + vname + \
+    '[' + str(nc_time) + \
+    '][0:1:' + str(latnum-1) + \
+    '][0:1:' + str(lonnum-1) + \
+    ']'
+
+#    print(url)
+
+
+
 #     url = 'http://hfrnet-tds.ucsd.edu/thredds/dodsC/HFR/USEGC/6km/25hr/RTV/HFRADAR_US_East_and_Gulf_Coast_6km_Resolution_25_Hour_Average_RTV_best.ncd?lat[0:1:459],lon[0:1:700],time[11746],u_mean[11746][0:1:459][0:1:700],v_mean[11746][0:1:459][0:1:700]'
     # region = 'USEGC'
     # nc_time = 11764 # hours since 2019-09-29 20:00:00.000 UTC
     ncout_name = dout_data + region + '_' + str(radar_km_resolution) + 'km_' + str(nc_time) + '.nc' 
-    url = 'http://hfrnet-tds.ucsd.edu/thredds/dodsC/HFR/' + region + '/' + str(radar_km_resolution) +         'km/25hr/RTV/HFRADAR_US_East_and_Gulf_Coast_' + str(radar_km_resolution) + 'km_Resolution_25_Hour_Average_RTV_best.ncd?' +         'lat[0:1:459],lon[0:1:700],time[' + str(nc_time) + '],u_mean[' + str(nc_time) +         '][0:1:459][0:1:700],v_mean[' + str(nc_time) + '][0:1:459][0:1:700]'
-    
+ 
+
+#    url = 'http://hfrnet-tds.ucsd.edu/thredds/dodsC/HFR/' + region + '/' + str(radar_km_resolution) +         'km/25hr/RTV/HFRADAR_US_East_and_Gulf_Coast_' + str(radar_km_resolution) + 'km_Resolution_25_Hour_Average_RTV_best.ncd?' +         'lat[0:1:459],lon[0:1:700],time[' + str(nc_time) + '],u_mean[' + str(nc_time) +         '][0:1:459][0:1:700],v_mean[' + str(nc_time) + '][0:1:459][0:1:700]'
+#    
+#    print(url)
     try:
         print('downloading data ...')
         ncin = Dataset(url)
+        print('downloaded')
     except OSError:
-        print('file does not exist or website down')
-        print(url)
+        print('download failed, file does not exist or website down')
+#        print(url)
         break
     
     print('running eddy analysis ...')
