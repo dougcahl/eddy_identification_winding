@@ -1,7 +1,7 @@
 %% to run your own data set (lon, lat, u, v)
 clear
-%% load uv data
-load data1.mat
+%% load uv data, this is just the data from the netcdf in the next section
+% load data1.mat
 
 %% or load from netcdf
 nc = '202004030900_hfr_usegc_2km_rtv_uwls_NDBC.nc'; % this one has some eddies in it

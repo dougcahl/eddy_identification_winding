@@ -44,9 +44,9 @@ if plt_debug == 1
     m_proj('Mercator','lon',[lon_min lon_max],'lat',[lat_min lat_max])
     % m_gshhs_h('patch',[0.8 0.8 0.8]); % coastline
     if lonlatlimits == 1 && highrescoast == 1
-        m_gshhs_i('patch',[0.8 0.8 0.8])
+        m_gshhs_i('patch',[0.8 0.8 0.8]);
     else
-        m_gshhs_l('patch',[0.8 0.8 0.8])
+        m_gshhs_l('patch',[0.8 0.8 0.8]);
     end
     
     % levels = [-10:-5:-30 -40 -50 -100 -150 -200]; % isobaths
@@ -339,7 +339,6 @@ for j1 = 1:length(i1)
 end
 
 % show time of calculation
-toc
 
 if eddies == 0
     eddy_center_x = [];
