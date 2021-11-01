@@ -1,7 +1,6 @@
-# eddy_identification_winding
-Eddy identificationfor HF radar data sets using the Winding Angle method
+# Matlab eddy finding routine
+Eddy identification for HF radar data sets using the Winding Angle method
 
-Run via 'python3 eddy_master.py'. This will create a directory structure to save data in. The debug_plot switches can turn on or off image creation. 
-There is an option for ftp upload that you can uncomment.
+For your own data sets of lon, lat, u, v data, or single netcdf files, use eddy_uvdata.m
 
-A video description, data download and an interactive realtime eddy analysis overlayed on google maps is available at http://douglascahl.com/eddy/
+For large netcdf collection you have downloaded already, use eddy_netcdf.m to loop through them
