@@ -62,18 +62,9 @@ done
 
 
 
-#
-#
-#for avg_25hr in range(1,7):
-#    for radar_km_resolution in range(1,7):
-#        for region_num in range(1,7):
-#
-#
-#
-#
 
 #
-# To run a single region and resolution
+# To run a single region and resolution, examples below
 #
 #python3 -u master1.py 0 6 1 >> logs/eddy_master_usegc6_hourly.txt &
 #python3 -u master1.py 0 2 1 >> logs/eddy_master_usegc2_hourly.txt &
@@ -84,18 +75,4 @@ done
 #python3 -u master1.py 1 1 1 >> logs/eddy_master_usegc1_25hr.txt &
 
 
-#python3 -u eddy_master_usegc6_hourly.py >> logs/eddy_master_usegc6_hourly.txt &
-#python3 -u eddy_master_usegc2_hourly.py >> logs/eddy_master_usegc2_hourly.txt &
-#python3 -u eddy_master_usegc1_hourly.py >> logs/eddy_master_usegc1_hourly.txt &
-#
-#python3 -u eddy_master_usegc6_25hr.py >> logs/eddy_master_usegc6_25hr.txt &
-#python3 -u eddy_master_usegc2_25hr.py >> logs/eddy_master_usegc2_25hr.txt &
-#python3 -u eddy_master_usegc1_25hr.py >> logs/eddy_master_usegc1_25hr.txt &
-
-#pid1 = subprocess.Popen([sys.executable, "eddy_master_usegc6_hourly.py"])
-#pid2 = subprocess.Popen([sys.executable, "eddy_master_usegc2_hourly.py"])
-#pid3 = subprocess.Popen([sys.executable, "eddy_master_usegc1_hourly.py"])
-#pid4 = subprocess.Popen([sys.executable, "eddy_master_usegc6_25hr.py"])  
-#pid5 = subprocess.Popen([sys.executable, "eddy_master_usegc2_25hr.py"])
-#pid6 = subprocess.Popen([sys.executable, "eddy_master_usegc1_25hr.py"])
 
