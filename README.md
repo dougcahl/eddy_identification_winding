@@ -5,7 +5,6 @@ Eddy identificationfor HF radar data sets using the Winding Angle method. Suppor
 see eddy_all_regions.sh for how to run. 
 </code>
 
-
-  <br>
-
+<p>
 A video description, data download and an interactive realtime eddy analysis overlayed on google maps is available at http://douglascahl.com/eddy/
+</p>
