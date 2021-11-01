@@ -1,9 +1,9 @@
 # eddy_identification_winding
 Eddy identificationfor HF radar data sets using the Winding Angle method. Supports all 6 US regions of HFR data for downloading and processing in 1,2 and 6 km resolution. You can run all the regions and resolutions simultaneously with enough ram. 
 
-<code>
-see eddy_all_regions.sh for how to run. 
-</code>
+
+see <code>eddy_all_regions.sh</code> for details on how to run
+
 
 <p>
 </p>
