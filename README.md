@@ -1,7 +1,7 @@
 # eddy_identification_winding
 Eddy identificationfor HF radar data sets using the Winding Angle method
 
-<code>
+<nobr>
 call with master1.py avg_25hr radar_km_resolution region_num
 where 
 region_num = 1    region = 'USEGC'    # 1,2,6 km                              fullregionname = 'HFRADAR_US_East_and_Gulf_Coast'
@@ -16,6 +16,6 @@ run with:   ./eddy_all_regions.sh > master.log
 find with:  sudo ps -af | grep master1
 kill with:  sudo pkill -f 'master1.py'
 check logs: ls *.txt | xargs -I{} tail -1 {}
-</code>
+</nobr>
 
 A video description, data download and an interactive realtime eddy analysis overlayed on google maps is available at http://douglascahl.com/eddy/
