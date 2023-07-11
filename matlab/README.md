@@ -12,7 +12,4 @@ Use <code>eddy_tracking.m</code> tracks the eddies found from above script
 
 Use <code>analyze_eddy_tracks.m</code> plots the eddy tracks found from above script and some data analysis
 
-
-Use <code>eddy_netcdf.m</code> to loop through large downloaded data sets of netcdf files in 1,2 or 6km resolution
-
 More information available at http://douglascahl.com/eddy/
