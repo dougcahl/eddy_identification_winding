@@ -3,6 +3,7 @@ Eddy identificationfor HF radar data sets using the Winding Angle method using m
 Modified and written by Douglas Cahl, PhD 
 University of South Carolina 2023
 
+Add m_map and the etopo1 data inside m_map/etopo1/etopo1_ice_g_i2.bin, etopo1_ice_g_i2.hdr
 
 Use <code>eddy_uvdata.m</code> for your own lon,lat,u,v data set or for single netcdf files
 
