@@ -11,14 +11,13 @@ Saves data/results/data2_tracks.mat with the same variables as MATLAB.
 """
 
 import os
-import re
 import glob
 
 import numpy as np
 from matplotlib.path import Path
-from scipy.io import loadmat, savemat
 
 from utm_dc import geog2utm_nodisp
+from results_io import load_ident_nc, save_tracks_nc
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 if not os.path.isdir('data') and os.path.isdir(os.path.join('..', 'data')):
@@ -45,26 +44,13 @@ def _inpoly(px, py, polyx, polyy):
 
 # %% load data
 files = []
-for fn in sorted(glob.glob(name_dir + name_pre + '*.mat')):
+for fn in sorted(glob.glob(name_dir + name_pre + '*.nc')):
     base = os.path.basename(fn)
     if 'tracks' in base:
         continue
     files.append(fn)
 
-recs = []
-for fn in files:
-    data = loadmat(fn)
-    recs.append({
-        'eddy_angular_vel': np.ravel(data['eddy_angular_vel']),
-        'eddy_center_lat': np.ravel(data['eddy_center_lat']),
-        'eddy_center_lon': np.ravel(data['eddy_center_lon']),
-        'eddy_dir': np.ravel(data['eddy_dir']),
-        'eddy_ellipse_theta': np.ravel(data['eddy_ellipse_theta']),
-        'eddy_length_x': np.ravel(data['eddy_length_x']),
-        'eddy_length_y': np.ravel(data['eddy_length_y']),
-        'eddy_streamlines': np.ravel(data['eddy_streamlines']),
-        'time': float(np.ravel(data['time'])[0]),
-    })
+recs = [load_ident_nc(fn) for fn in files]
 
 # %% sort by time
 recs.sort(key=lambda r: r['time'])
@@ -198,26 +184,11 @@ for it in range(1, len(time)):
 print('Finished eddy track finding')
 print('number of tracks = %d' % total_tracks)
 
-# %% save (same variable names as MATLAB; cells -> object arrays)
-def _cell(lists):
-    c = np.empty((1, len(lists)), dtype=object)
-    for k, v in enumerate(lists):
-        c[0, k] = np.asarray(v, dtype=float).reshape(-1, 1)
-    return c
-
-savemat(outfile + '.mat', {
-    'total_tracks': float(total_tracks),
-    'lat_center': _cell(lat_center),
-    'lon_center': _cell(lon_center),
-    'ellipse_theta': _cell(ellipse_theta),
-    'eig1': _cell(eig1),
-    'eig2': _cell(eig2),
-    'omega': _cell(omega),
-    'direction': _cell(direction),
-    'num_streams': _cell(num_streams),
-    'Time': _cell(Time),
-    'timegap': np.asarray(timegap, dtype=float).reshape(1, -1),
-    'eddy_track_dist_param': float(eddy_track_dist_param),
-    'eddy_track_time_param': float(eddy_track_time_param),
-})
-print('saved %s.mat' % outfile)
+# %% save (native NetCDF)
+save_tracks_nc(outfile,
+               {'lat_center': lat_center, 'lon_center': lon_center,
+                'ellipse_theta': ellipse_theta, 'eig1': eig1, 'eig2': eig2,
+                'omega': omega, 'direction': direction,
+                'num_streams': num_streams},
+               Time, timegap, eddy_track_dist_param, eddy_track_time_param)
+print('saved %s.nc' % outfile)

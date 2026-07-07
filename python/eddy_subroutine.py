@@ -21,7 +21,8 @@ import numpy as np
 from matplotlib.path import Path
 from scipy.interpolate import LinearNDInterpolator
 from scipy.spatial import Delaunay
-from scipy.io import savemat
+
+from results_io import save_ident_nc
 
 from stream2_dc import stream2_dc
 from utm_dc import geog2utm_nodisp, utm2ll, auto_zone
@@ -384,36 +385,29 @@ def eddy_subroutine(params, u, v, time, lons, lats, lon=None, lat=None):
                 if params['plt_close']:
                     plt.close(h)
 
-    # ---------------- save data (same variable names as MATLAB) ----------------
-    n_ed = eddies
-    maxk = max((len(s) for s in eddy_streamlines_lon), default=0)
-    cell_lon = np.empty((n_ed, maxk), dtype=object)
-    cell_lat = np.empty((n_ed, maxk), dtype=object)
-    for a in range(n_ed):
-        for b in range(maxk):
-            cell_lon[a, b] = np.zeros((0, 0))
-            cell_lat[a, b] = np.zeros((0, 0))
-    for a in range(n_ed):
-        if save_streams and a < len(eddy_streamlines_lon):
-            for b, s in enumerate(eddy_streamlines_lon[a]):
-                cell_lon[a, b] = np.asarray(s).reshape(-1, 1)
-            for b, s in enumerate(eddy_streamlines_lat[a]):
-                cell_lat[a, b] = np.asarray(s).reshape(-1, 1)
-
-    savemat(save_data_name + '.mat', {
-        'eddy_center_lat': np.asarray(eddy_center_lat),
-        'eddy_center_lon': np.asarray(eddy_center_lon),
-        'eddy_dir': np.asarray(eddy_dir, dtype=float),
-        'eddy_angular_vel': np.asarray(eddy_angular_vel),
-        'eddy_streamlines': np.asarray(eddy_streamlines, dtype=float),
-        'eddy_length_x': np.asarray(eddy_length_x),
-        'eddy_length_y': np.asarray(eddy_length_y),
-        'eddy_ellipse_theta': np.asarray(eddy_ellipse_theta),
-        'eddy_streamlines_lat': cell_lat,
-        'eddy_streamlines_lon': cell_lon,
-        'UTMzone': UTMzone if i_streams else 0,
-        'time': np.asarray(time, dtype=float),
-    })
+    # ---------------- save data (native NetCDF) ----------------
+    s_lat = []
+    s_lon = []
+    s_eddy = []
+    if save_streams:
+        for a in range(len(eddy_streamlines_lon)):
+            for s in eddy_streamlines_lat[a]:
+                s_lat.append(np.ravel(s))
+                s_eddy.append(a)
+            for s in eddy_streamlines_lon[a]:
+                s_lon.append(np.ravel(s))
+    save_ident_nc(save_data_name,
+                  float(np.ravel(time)[0]),
+                  gzone if i_streams else 0,
+                  {'eddy_center_lat': eddy_center_lat,
+                   'eddy_center_lon': eddy_center_lon,
+                   'eddy_dir': eddy_dir,
+                   'eddy_angular_vel': eddy_angular_vel,
+                   'eddy_streamlines': eddy_streamlines,
+                   'eddy_length_x': eddy_length_x,
+                   'eddy_length_y': eddy_length_y,
+                   'eddy_ellipse_theta': eddy_ellipse_theta},
+                  s_lat, s_lon, s_eddy)
 
     # ---------------- save plot ----------------
     if params['plt_debug_sv'] and params['plt_debug'] and not params['plt_each_eddy'] and h is not None:

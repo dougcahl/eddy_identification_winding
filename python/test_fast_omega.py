@@ -15,7 +15,7 @@ STEPS = [1, 25, 50, 61, 75, 101]  # 1-based
 
 
 def run_pair(i):
-    from scipy.io import loadmat
+    from results_io import load_ident_nc
     from eddy_uvdata_loop import load_data, make_params
     from eddy_subroutine import eddy_subroutine
     lons, lats, u1, v1, time1 = load_data()
@@ -27,21 +27,16 @@ def run_pair(i):
         params['save_fig_name'] = 'data/testing/ab_%d_fast%d' % (i, fast)
         eddy_subroutine(params, u1[:, :, i - 1], v1[:, :, i - 1], time1[i - 1],
                         lons, lats)
-        out[fast] = loadmat(params['save_data_name'] + '.mat')
+        out[fast] = load_ident_nc(params['save_data_name'] + '.nc')
     a, b = out[1], out[0]
     geom_keys = ['eddy_center_lat', 'eddy_center_lon', 'eddy_dir',
                  'eddy_streamlines', 'eddy_length_x', 'eddy_length_y',
-                 'eddy_ellipse_theta', 'eddy_streamlines_lat',
-                 'eddy_streamlines_lon']
+                 'eddy_ellipse_theta']
 
-    def eq(x, y):
-        if x.dtype == object:
-            return x.shape == y.shape and all(
-                np.array_equal(np.ravel(x[i2, j2]), np.ravel(y[i2, j2]))
-                for i2 in range(x.shape[0]) for j2 in range(x.shape[1]))
-        return np.array_equal(x, y)
-
-    geom_same = all(eq(a[k], b[k]) for k in geom_keys)
+    geom_same = all(np.array_equal(a[k], b[k]) for k in geom_keys)
+    geom_same = geom_same and len(a['stream_lat']) == len(b['stream_lat']) \
+        and all(np.array_equal(x, y) for x, y in zip(a['stream_lat'], b['stream_lat'])) \
+        and all(np.array_equal(x, y) for x, y in zip(a['stream_lon'], b['stream_lon']))
     oa = np.ravel(a['eddy_angular_vel'])
     ob = np.ravel(b['eddy_angular_vel'])
     nan_a, nan_b = np.isnan(oa), np.isnan(ob)

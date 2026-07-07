@@ -42,8 +42,10 @@ data2 example (90×95 grid, ~2,380 valid points, one timestep, single core):
 | Python v2 + numba kernels | ~52 s |
 | Python v2 + numba + fast_omega | **~1.5 s** |
 
-The 101-timestep loop runs in about 1 minute on 14 cores (was ~24 min pure
-Python; MATLAB ~36 min single-core).
+The full 101-timestep pipeline runs in ~32 s on 14 cores (identification
+27.9 s + tracking 2.4 s + analysis 1.3 s; was ~24 min pure Python, MATLAB
+~36 min single-core). Verified against MATLAB with `verify_vs_matlab.py`:
+all 191 eddies match with centers within 10⁻¹³ degrees and identical tracks.
 
 ## Requirements
 
@@ -78,20 +80,20 @@ python eddy_tracking.py          # link identifications into tracks
 python analyze_eddy_tracks.py    # track map + statistics figures
 ```
 
-Input is `data/data2.nc` — the MATLAB repo's `data2.mat` converted to NetCDF
-(`python convert_data.py data`); the original `.mat` is kept alongside for
-MATLAB use. Per-timestep results and the tracks file are written as `.mat`
-(same variable names as the MATLAB repo, for direct comparison) and can be
-converted to NetCDF with `python convert_data.py results`, which writes a
-`.nc` next to every result `.mat` (ragged streamline/track series stored as
-concatenated arrays with `*_start`/`*_len` index vectors).
+## Data formats — NetCDF only
 
-## Data formats
+The pipeline is fully NetCDF-native; no `.mat` files are read or written.
 
-- **Input**: NetCDF (`data/data2.nc`, or any lon/lat/u/v/time source)
-- **Results**: `.mat` for MATLAB interop + `.nc` via `convert_data.py results`
-- Time in the `.nc` files is CF-style `days since 1970-01-01`, with the exact
-  original MATLAB datenum kept in `matlab_datenum`
+- **Input**: `data/data2.nc` (or any lon/lat/u/v/time source). Convert a
+  MATLAB `data2.mat` with `python convert_data.py data`.
+- **Results**: per-timestep `data2_<i>.nc` and `data2_tracks.nc`, written by
+  `results_io.py` — per-eddy variables plus ragged streamline/track series as
+  concatenated arrays with `*_start`/`*_len` index vectors.
+- Time is CF-style `days since 1970-01-01`, with the exact original MATLAB
+  datenum kept in `matlab_datenum`.
+- `convert_data.py results` imports MATLAB-produced result `.mat` files to
+  the same `.nc` schema, and `verify_vs_matlab.py` compares a Python run
+  against a MATLAB run file-by-file.
 
 ## Files
 
@@ -103,5 +105,7 @@ concatenated arrays with `*_start`/`*_len` index vectors).
 - `stream2_dc.py` — streamline integrator (port of `stream2_dc.m`)
 - `utm_dc.py` — `geog2utm_nodisp` / `utm2ll` ports
 - `etopo1_reader.py` — ETOPO1 subregion reader (replaces `m_etopo2`)
-- `convert_data.py` — `.mat` ↔ NetCDF conversion for input data and results
+- `results_io.py` — native NetCDF read/write for results and tracks
+- `convert_data.py` — import MATLAB `.mat` data/results to the `.nc` schema
+- `verify_vs_matlab.py` — file-by-file comparison of a Python run vs a MATLAB run
 - `kernels_numba.py` — numba (LLVM) kernels for the integrator and winding scan

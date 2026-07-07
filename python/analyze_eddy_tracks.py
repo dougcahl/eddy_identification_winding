@@ -14,10 +14,11 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from scipy.io import loadmat
+from netCDF4 import Dataset
 
 from utm_dc import geog2utm_nodisp
 from etopo1_reader import read_etopo1
+from results_io import load_tracks_nc
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 if not os.path.isdir('data') and os.path.isdir(os.path.join('..', 'data')):
@@ -32,20 +33,21 @@ radar_dt = 0.5   # timestep in hours
 # %% load
 name_dir = 'data/results/'
 name_pre = 'data2_'
-t = loadmat(name_dir + name_pre + 'tracks.mat')
-data = loadmat('data/data2.mat')
-lons = data['lons']; lats = data['lats']
+t = load_tracks_nc(name_dir + name_pre + 'tracks.nc')
+with Dataset('data/data2.nc') as nc:
+    lons = np.array(nc.variables['lon'][:])
+    lats = np.array(nc.variables['lat'][:])
 
-lon_center = [np.ravel(c) for c in t['lon_center'][0]]
-lat_center = [np.ravel(c) for c in t['lat_center'][0]]
-omega = [np.ravel(c) for c in t['omega'][0]]
-num_streams = [np.ravel(c) for c in t['num_streams'][0]]
-eig1 = [np.ravel(c) for c in t['eig1'][0]]
-eig2 = [np.ravel(c) for c in t['eig2'][0]]
-direction = [np.ravel(c) for c in t['direction'][0]]
-Time = [np.ravel(c) for c in t['Time'][0]]
-timegap = np.ravel(t['timegap'])
-eddy_track_time_param = float(np.ravel(t['eddy_track_time_param'])[0])
+lon_center = t['lon_center']
+lat_center = t['lat_center']
+omega = t['omega']
+num_streams = t['num_streams']
+eig1 = t['eig1']
+eig2 = t['eig2']
+direction = t['direction']
+Time = t['Time']
+timegap = t['timegap']
+eddy_track_time_param = t['eddy_track_time_param']
 
 # %% setup
 lon_min = float(np.floor(10 * np.nanmin(lons)) / 10)

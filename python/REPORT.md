@@ -47,12 +47,15 @@ saved to results, and figures with bathymetry and coastline.
 
 | Quantity | MATLAB | Python |
 |---|---|---|
-| Eddies identified | 191 | 191 |
+| Eddies identified | 191 | 191 (zero count mismatches in 101 timesteps) |
 | Max eddies in one timestep | 5 | 5 |
 | Max streamlines in one eddy | 162 | 162 |
+| Eddy centers | — | max difference 10⁻¹³ degrees (float64 rounding) |
+| Ellipse axes / angle | — | within 10⁻¹² km / 4×10⁻¹¹ degrees |
 | Tracks | 17 | 17 |
 | Track lengths (timesteps) | 90, 44, 33, 5, 4, 3, 2, ten 1s | identical |
-| Track center series | — | all agree to < 10⁻⁸ degrees |
+
+(`verify_vs_matlab.py` performs this comparison file-by-file.)
 
 | MATLAB tracks | Python tracks |
 |---|---|
@@ -84,12 +87,12 @@ End-to-end on the 101-timestep data2 example (14 cores):
 
 | Stage | MATLAB (single core) | Python |
 |---|---|---|
-| Identification (101 timesteps) | ~36 min | **30.4 s** |
-| Tracking | seconds | 2.1 s |
-| Track analysis + figures | seconds | 2.1 s |
-| **Total** | **~36 min** | **34.7 s** |
+| Identification (101 timesteps) | ~36 min | **27.9 s** |
+| Tracking | seconds | 2.4 s |
+| Track analysis + figures | seconds | 1.3 s |
+| **Total** | **~36 min** | **31.7 s** |
 
-Single-file Delaware Bay example including the full map figure: 2.7 s.
+Single-file Delaware Bay example including the full map figure: ~3 s.
 
 ### fast_omega A/B (6 timesteps: 1, 25, 50, 61, 75, 101)
 
@@ -101,15 +104,18 @@ than the MATLAB↔Python interpolant difference. Set `params['fast_omega'] = 0`
 for per-window interpolation (~50 s/timestep) that matches the pure-Python
 baseline bit-exactly.
 
-## Data formats
+## Data formats — NetCDF only
 
-- Input: NetCDF (`data/data2.nc`, converted bit-exactly from `data2.mat` by
+The Python pipeline reads and writes only NetCDF; no `.mat` files are needed.
+
+- Input: `data/data2.nc` (converted bit-exactly from `data2.mat` by
   `convert_data.py data`; time stored as CF `days since 1970-01-01` with the
   original MATLAB datenum kept in `matlab_datenum`).
-- Results: `.mat` with the same variable names as MATLAB (directly
-  comparable/loadable), plus `.nc` via `convert_data.py results` (ragged
-  streamline/track series as concatenated arrays with `*_start`/`*_len`
-  index vectors).
+- Results: `data2_<i>.nc` per timestep and `data2_tracks.nc`, written by
+  `results_io.py` (ragged streamline/track series as concatenated arrays
+  with `*_start`/`*_len` index vectors). `convert_data.py results` imports
+  MATLAB-produced `.mat` results to the same schema; `verify_vs_matlab.py`
+  compares a Python run against a MATLAB run.
 
 ## Requirements
 
