@@ -22,11 +22,28 @@ The complete pipeline, matching the MATLAB scripts one-to-one:
 | `etopo1_reader.py` | `m_etopo2` | ETOPO1 bathymetry + coastline for figures |
 | `convert_data.py` | — | `.mat` ↔ NetCDF conversion (input + results) |
 
-Key algorithm features carried over from the MATLAB upgrade: the
-**Cahl et al. 2023 polygon (`inpolygon`) clustering**, the `stream2_dc`
-integrator (no visited-cell termination, so 300°/10 km thresholds work),
-consistent UTM zone handling, the √(2λ) ellipse axes, per-streamline lat/lon
-saved to results, and figures with bathymetry and coastline.
+## Algorithm features (the current MATLAB repo's upgrades, all ported)
+
+- **Cahl et al. 2023 clustering (`inpolygon`).** Instead of merging winding
+  streamlines by a fixed center distance (Sadarjoen & Post 2000), each
+  streamline is treated as a closed polygon: two streamlines belong to the
+  same eddy when one's center lies inside the other's polygon, or the
+  polygons overlap in more than one point, with a resolution-scaled
+  center-distance fallback (2√2 × grid resolution). Nested/concentric
+  streamlines cluster correctly at any eddy size. Switchable via
+  `new_dist_thres` (0 = old method).
+- **`stream2_dc` integrator.** Inverse-distance-weighted 4-node velocity,
+  Euler steps of 0.2 cell up to 2000 vertices, no visited-cell bookkeeping —
+  circling streamlines keep winding, which is what allows the strict
+  thresholds (winding > 300°, closure < 10 km).
+- **Consistent UTM zone handling** through streamline, center, and ellipse
+  conversions (`geog2utm_nodisp` / `utm2ll`, exact constant-for-constant ports).
+- **√(2λ) ellipse axes** (proper standard-deviational ellipse).
+- **Per-streamline lat/lon saved** with the results (`save_streams`).
+- **Map figures** with the current-speed field, unit-vector quiver, labeled
+  ETOPO1 bathymetry contours, and land/coastline.
+- **Eddy tracking** with the ellipse-containment continuation test and
+  gap-bridging (`eddy_track_time_param`), plus track statistics/plots.
 
 ## Validation 1 — single file (Delaware Bay, 2 km, 2020-04-03 09:00)
 
