@@ -132,6 +132,19 @@ MATLAB's `scatteredInterpolant` extrapolates outside the data hull while
 scipy's `griddata` returns NaN (≤ 10⁻³ deg/s differences, a few extra NaNs).
 Detection, positions, shapes, and tracking are unaffected.
 
+### Example detections from the multi-eddy period
+
+Timestep 54 (2013-01-04 04:30 UTC) — 4 eddies detected (119, 21, 9, and 2
+streamlines; eddies with fewer than 6 streamlines are kept in the results but
+not drawn):
+
+![Timestep 54 detection: four eddies](docs/detection_t54.png)
+
+Timestep 56 (2013-01-04 05:30 UTC) — 3 eddies detected (91, 55, and 5
+streamlines):
+
+![Timestep 56 detection: three eddies](docs/detection_t56.png)
+
 ## Performance
 
 The hot loops (streamline integration, winding scan) are numba-compiled
