@@ -149,14 +149,18 @@ One data2 timestep (90×95 grid, ~2,380 valid points, single core):
 | + numba kernels (bit-identical) | ~52 s |
 | + `fast_omega` (ω diagnostic only) | **~1.5 s** |
 
-End-to-end on the 101-timestep data2 example (14 cores):
+End-to-end on the 101-timestep data2 example:
 
-| Stage | MATLAB (single core) | Python |
+| Stage | MATLAB (single core) | Python (+numba +fast_omega + 14 cores) |
 |---|---|---|
 | Identification (101 timesteps) | ~36 min | **27.9 s** |
 | Tracking | seconds | 2.4 s |
 | Track analysis + figures | seconds | 1.3 s |
 | **Total** | **~36 min** | **31.7 s** |
+
+Timings measured on an otherwise idle machine; expect proportionally longer
+wall times when other jobs share the CPU. The first run after installing (or
+moving) the code also pays a one-time numba compilation cost per core.
 
 Single-file Delaware Bay example including the full map figure: ~3 s.
 
