@@ -16,7 +16,8 @@ NROWS = 180 * PTSPERDEG + 1   # 10801
 _HERE = os.path.dirname(os.path.abspath(__file__))
 SEARCH_PATHS = [
     os.path.join(_HERE, 'etopo1', 'etopo1_ice_g_i2.bin'),
-    os.path.join(_HERE, '..', 'm_map', 'etopo1', 'etopo1_ice_g_i2.bin'),  # repo layout
+    os.path.join(_HERE, 'm_map', 'etopo1', 'etopo1_ice_g_i2.bin'),
+    os.path.join(_HERE, '..', 'm_map', 'etopo1', 'etopo1_ice_g_i2.bin'),
     os.path.join(_HERE, '..', 'etopo1', 'etopo1_ice_g_i2.bin'),
     r'D:\sync\MATLAB\m_map\etopo1\etopo1_ice_g_i2.bin',
 ]

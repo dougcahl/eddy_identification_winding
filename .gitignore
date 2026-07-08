@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+/etopo1/
+/private/
+*.asv
+run_tracking_log.txt*
