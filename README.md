@@ -10,9 +10,14 @@ agreement is at machine precision).
 
 ## Quick start (Python)
 
-Requires Python 3.10+ with `numpy`, `scipy`, `matplotlib`, `netCDF4`;
-`numba` is optional but strongly recommended (~40× faster hot loops,
-bit-identical results).
+Requires Python 3.10+:
+
+```
+pip install -r requirements.txt
+```
+
+(`numba` is optional — there is a pure-Python fallback — but strongly
+recommended: ~40× faster hot loops with bit-identical results.)
 
 ```
 python eddy_uvdata.py        # single netcdf file example (Delaware Bay sample)

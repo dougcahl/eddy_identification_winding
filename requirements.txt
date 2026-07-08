@@ -1,0 +1,8 @@
+# Install with:  pip install -r requirements.txt
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7
+netCDF4>=1.6
+# numba is optional (pure-Python fallback exists) but strongly recommended:
+# the compiled kernels are ~40x faster with bit-identical results
+numba>=0.60
