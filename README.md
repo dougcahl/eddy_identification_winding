@@ -54,6 +54,24 @@ The original MATLAB toolbox is in [`matlab/`](matlab/) — see its README.
 Run it from the repo root (`addpath('matlab')`) so the relative `data/`
 paths resolve. It requires m_map with the etopo1 and GSHHS data files.
 
+## Optional: momentum flux & EKE analysis
+
+`momentum_flux.py` implements the shelf-break momentum flux method of
+Cahl (2023, PhD thesis ch. 4): currents rotated into an isobath-aligned frame
+(`isobath_bearing()` can estimate the rotation from ETOPO1), Reynolds
+decomposition against a time mean, ⟨u′v′⟩ (cm²s⁻²) and EKE maps, and an
+along-isobath flux profile. Run `python momentum_flux.py` for a demonstration
+on the bundled data2 example.
+
+**Validity guardrails** (see the module docstring): momentum flux is a
+second-order statistic — the thesis used a full year of subtidal currents;
+the module warns on records shorter than 30 days and on inputs with
+significant semidiurnal (tidal) energy, and the rotation applies only along a
+roughly straight isobath segment. Treat short-record output as a
+demonstration of the mechanism, not as stable statistics.
+
+![Momentum flux with eddy tracks](docs/momentum_flux_eddies.png)
+
 ## Data formats — NetCDF
 
 The Python pipeline reads and writes only NetCDF; no `.mat` files are needed.
