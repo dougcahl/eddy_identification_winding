@@ -86,6 +86,13 @@ The Python pipeline reads and writes only NetCDF; no `.mat` files are needed.
 
 More information at http://douglascahl.com/eddy/
 
+## License
+
+[AGPL-3.0](LICENSE) — free for any use; if you distribute modified versions
+**or run them as a network service**, you must make your modified source
+available under the same license. For other licensing arrangements, contact
+the author.
+
 ---
 
 # Validation & performance report
