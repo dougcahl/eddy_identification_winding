@@ -1,8 +1,14 @@
 # eddy_identification_winding
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5765639.svg)](https://doi.org/10.5281/zenodo.5765639)
+
 Eddy identification and tracking for HF radar surface current data using the
 Winding Angle method, with the Cahl et al. (2023) streamline clustering.
 Douglas Cahl, PhD — University of South Carolina.
+
+To cite this software, use the **Cite this repository** button (from
+[CITATION.cff](CITATION.cff)) or the Zenodo DOI above, which always resolves
+to the latest archived version.
 
 The toolbox is Python-first (this folder); the original MATLAB code lives in
 [`matlab/`](matlab/) and produces the same results (see the report below —

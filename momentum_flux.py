@@ -174,6 +174,85 @@ def momentum_flux(lons, lats, u, v, time_datenum, bearing_deg,
             'bearing_deg': float(bearing_deg), 'warnings': notes}
 
 
+def eddy_background_decomposition(lons, lats, u, v, time_datenum, bearing_deg,
+                                  ident_dir='data/results', ident_pre='data2_',
+                                  mask_scale=1.5, min_valid_frac=0.5):
+    """Partition the momentum flux into the part accumulated while a grid
+    point sits inside a detected eddy vs. the background.
+
+    Uses the per-timestep identification results (the fitted ellipses, scaled
+    by mask_scale since an eddy's velocity signature extends beyond its
+    winding core) to build an inside-eddy mask for every timestep. The time
+    sum of u'v' is then split exactly:
+
+        <u'v'>_total = <u'v'>_eddy + <u'v'>_background
+
+    where each part is the sum of instantaneous u'v' over the timesteps the
+    point is inside / outside any eddy footprint, divided by the total number
+    of valid timesteps. u', v' remain defined against the full-record mean.
+
+    Returns dict with flux_total, flux_eddy, flux_background (cm^2 s^-2) and
+    occupancy (fraction of timesteps inside an eddy footprint).
+    """
+    from results_io import load_ident_nc
+
+    u = np.asarray(u, dtype=float)
+    v = np.asarray(v, dtype=float)
+    t = np.asarray(time_datenum, dtype=float)
+    ni, nj, nt = u.shape
+    km_per_deg = 111.32
+
+    # per-timestep inside-eddy masks from the scaled fitted ellipses
+    inside = np.zeros((ni, nj, nt), dtype=bool)
+    for k in range(nt):
+        fn = os.path.join(ident_dir, '%s%d.nc' % (ident_pre, k + 1))
+        if not os.path.isfile(fn):
+            continue
+        r = load_ident_nc(fn)
+        if abs(r['time'] - t[k]) > 1e-6:
+            raise ValueError('%s time does not match timestep %d' % (fn, k + 1))
+        for e in range(len(r['eddy_streamlines'])):
+            clat = r['eddy_center_lat'][e]
+            clon = r['eddy_center_lon'][e]
+            l1 = r['eddy_length_x'][e] * mask_scale   # km
+            l2 = r['eddy_length_y'][e] * mask_scale
+            th = np.deg2rad(r['eddy_ellipse_theta'][e])
+            dx = (lons - clon) * km_per_deg * np.cos(np.deg2rad(clat))
+            dy = (lats - clat) * km_per_deg
+            xr = dx * np.cos(-th) - dy * np.sin(-th)
+            yr = dx * np.sin(-th) + dy * np.cos(-th)
+            inside[:, :, k] |= (xr / l1) ** 2 + (yr / l2) ** 2 <= 1.0
+
+    # rotated fluctuations against the full-record mean (as in momentum_flux)
+    Br = np.deg2rad(bearing_deg)
+    e_along = (np.sin(Br), np.cos(Br))
+    e_cross = (e_along[1], -e_along[0])
+    uc = u * e_cross[0] + v * e_cross[1]
+    va = u * e_along[0] + v * e_along[1]
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', category=RuntimeWarning)
+        s = (uc - np.nanmean(uc, axis=2, keepdims=True)) \
+            * (va - np.nanmean(va, axis=2, keepdims=True))   # instantaneous u'v'
+
+        valid = np.isfinite(s)
+        nvalid = valid.sum(axis=2).astype(float)
+        nvalid[nvalid == 0] = np.nan
+
+        s0 = np.where(valid, s, 0.0)
+        flux_total = s0.sum(axis=2) / nvalid * 1e4
+        flux_eddy = np.where(valid & inside, s, 0.0).sum(axis=2) / nvalid * 1e4
+        flux_bg = np.where(valid & ~inside, s, 0.0).sum(axis=2) / nvalid * 1e4
+        occupancy = (valid & inside).sum(axis=2) / nvalid
+
+    enough = np.isfinite(nvalid) & (np.nan_to_num(nvalid) >= min_valid_frac * nt)
+    for arr in (flux_total, flux_eddy, flux_bg, occupancy):
+        arr[~enough] = np.nan
+
+    return {'flux_total': flux_total, 'flux_eddy': flux_eddy,
+            'flux_background': flux_bg, 'occupancy': occupancy,
+            'mask_scale': mask_scale, 'bearing_deg': float(bearing_deg)}
+
+
 def segment_profile(lons, lats, field, p1, p2, n=40):
     """Sample a field along the segment p1->p2 (lon, lat) at n points by
     nearest grid node. Returns (seg_lon, seg_lat, dist_km, values)."""
@@ -357,6 +436,54 @@ if __name__ == '__main__':
     ax.set_title('Momentum flux with eddy tracks (blue CCW, red CW)\n%s' % tag,
                  color='crimson' if short else 'black')
     fig.savefig('data/results_figs/momentum_flux_eddies.png', dpi=150,
+                bbox_inches='tight')
+    plt.close(fig)
+
+    # ---------------- eddy vs background decomposition ----------------
+    dec = eddy_background_decomposition(lons, lats, u1, v1, time1, THETA,
+                                        mask_scale=1.5)
+    seg_e = segment_profile(lons, lats, dec['flux_eddy'], P1, P2)
+    seg_b = segment_profile(lons, lats, dec['flux_background'], P1, P2)
+    print('segment means: total %.1f = eddy %.1f + background %.1f cm2/s2'
+          % (np.nanmean(seg[3]), np.nanmean(seg_e[3]), np.nanmean(seg_b[3])))
+
+    fig, axs = plt.subplots(2, 2, figsize=(17, 14))
+    for ax, field, ttl in [
+            (axs[0, 0], dec['flux_total'], "(a) Total momentum flux <u'v'>"),
+            (axs[0, 1], dec['flux_eddy'],
+             "(b) Eddy contribution (inside %.1fx fitted ellipses)"
+             % dec['mask_scale']),
+            (axs[1, 0], dec['flux_background'], '(c) Background contribution')]:
+        pc = ax.pcolormesh(lons, lats, field, cmap='RdBu_r',
+                           vmin=-vmax, vmax=vmax, shading='auto', zorder=1)
+        plt.colorbar(pc, ax=ax, fraction=0.045).set_label('cm$^2$ s$^{-2}$')
+        if ax is axs[0, 1]:
+            cs = ax.contour(lons, lats, dec['occupancy'], levels=[0.25, 0.5],
+                            colors='k', linewidths=0.8, linestyles=[':', '-'],
+                            zorder=5)
+            ax.clabel(cs, fontsize=7, fmt='%.2f')
+        ax.plot([P1[0], P2[0]], [P1[1], P2[1]], 'k-', lw=2.5, zorder=6)
+        base(ax)
+        ax.set_title(ttl)
+
+    ax = axs[1, 1]
+    ax.plot(seg[2], seg[3], 'k.-', label='total (%.0f)' % np.nanmean(seg[3]))
+    ax.plot(seg_e[2], seg_e[3], 'r.-',
+            label='eddy (%.0f)' % np.nanmean(seg_e[3]))
+    ax.plot(seg_b[2], seg_b[3], 'b.-',
+            label='background (%.0f)' % np.nanmean(seg_b[3]))
+    ax.axhline(0, color='k', lw=0.8)
+    ax.set_xlabel('Distance along shelf-break segment (km, SW to NE)')
+    ax.set_ylabel("Momentum flux (cm$^2$ s$^{-2}$)")
+    ax.grid(alpha=0.4)
+    ax.legend(title='segment means (cm$^2$s$^{-2}$)')
+    ax.set_title('(d) Eddy vs background along the segment')
+
+    fig.suptitle('Momentum flux decomposition: eddy vs background — '
+                 'Long Bay, SC (data2)\n%s' % tag,
+                 fontsize=13, color='crimson' if short else 'black')
+    fig.tight_layout(rect=[0, 0, 1, 0.95])
+    fig.savefig('data/results_figs/momentum_flux_decomposition.png', dpi=150,
                 bbox_inches='tight')
     plt.close(fig)
     print('figures saved to data/results_figs/')
