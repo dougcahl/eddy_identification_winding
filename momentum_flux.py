@@ -442,23 +442,45 @@ if __name__ == '__main__':
     # ---------------- eddy vs background decomposition ----------------
     dec = eddy_background_decomposition(lons, lats, u1, v1, time1, THETA,
                                         mask_scale=1.5)
+    dec25 = eddy_background_decomposition(lons, lats, u1, v1, time1, THETA,
+                                          mask_scale=2.5)
     seg_e = segment_profile(lons, lats, dec['flux_eddy'], P1, P2)
     seg_b = segment_profile(lons, lats, dec['flux_background'], P1, P2)
-    print('segment means: total %.1f = eddy %.1f + background %.1f cm2/s2'
+    seg_e25 = segment_profile(lons, lats, dec25['flux_eddy'], P1, P2)
+    seg_b25 = segment_profile(lons, lats, dec25['flux_background'], P1, P2)
+    print('segment means (1.5x): total %.1f = eddy %.1f + background %.1f cm2/s2'
           % (np.nanmean(seg[3]), np.nanmean(seg_e[3]), np.nanmean(seg_b[3])))
+    print('segment means (2.5x): total %.1f = eddy %.1f + background %.1f cm2/s2'
+          % (np.nanmean(seg[3]), np.nanmean(seg_e25[3]), np.nanmean(seg_b25[3])))
 
-    fig, axs = plt.subplots(2, 2, figsize=(17, 14))
-    for ax, field, ttl in [
-            (axs[0, 0], dec['flux_total'], "(a) Total momentum flux <u'v'>"),
-            (axs[0, 1], dec['flux_eddy'],
+    def profile_panel(ax, se, sb, ttl):
+        ax.plot(seg[2], seg[3], 'k.-', label='total (%.0f)' % np.nanmean(seg[3]))
+        ax.plot(se[2], se[3], 'r.-', label='eddy (%.0f)' % np.nanmean(se[3]))
+        ax.plot(sb[2], sb[3], 'b.-',
+                label='background (%.0f)' % np.nanmean(sb[3]))
+        ax.axhline(0, color='k', lw=0.8)
+        ax.set_xlabel('Distance along shelf-break segment (km, SW to NE)')
+        ax.set_ylabel("Momentum flux (cm$^2$ s$^{-2}$)")
+        ax.grid(alpha=0.4)
+        ax.legend(title='segment means (cm$^2$s$^{-2}$)')
+        ax.set_title(ttl)
+
+    fig, axs = plt.subplots(3, 2, figsize=(17, 20))
+    for ax, d, field, ttl in [
+            (axs[0, 0], dec, dec['flux_total'], "(a) Total momentum flux <u'v'>"),
+            (axs[0, 1], dec, dec['flux_eddy'],
              "(b) Eddy contribution (inside %.1fx fitted ellipses)"
              % dec['mask_scale']),
-            (axs[1, 0], dec['flux_background'], '(c) Background contribution')]:
+            (axs[1, 0], dec, dec['flux_background'],
+             '(c) Background contribution (%.1fx)' % dec['mask_scale']),
+            (axs[2, 1], dec25, dec25['flux_eddy'],
+             "(f) Eddy contribution (%.1fx ellipses: velocity halo)"
+             % dec25['mask_scale'])]:
         pc = ax.pcolormesh(lons, lats, field, cmap='RdBu_r',
                            vmin=-vmax, vmax=vmax, shading='auto', zorder=1)
         plt.colorbar(pc, ax=ax, fraction=0.045).set_label('cm$^2$ s$^{-2}$')
-        if ax is axs[0, 1]:
-            cs = ax.contour(lons, lats, dec['occupancy'], levels=[0.25, 0.5],
+        if ttl.startswith(('(b)', '(f)')):
+            cs = ax.contour(lons, lats, d['occupancy'], levels=[0.25, 0.5],
                             colors='k', linewidths=0.8, linestyles=[':', '-'],
                             zorder=5)
             ax.clabel(cs, fontsize=7, fmt='%.2f')
@@ -466,18 +488,12 @@ if __name__ == '__main__':
         base(ax)
         ax.set_title(ttl)
 
-    ax = axs[1, 1]
-    ax.plot(seg[2], seg[3], 'k.-', label='total (%.0f)' % np.nanmean(seg[3]))
-    ax.plot(seg_e[2], seg_e[3], 'r.-',
-            label='eddy (%.0f)' % np.nanmean(seg_e[3]))
-    ax.plot(seg_b[2], seg_b[3], 'b.-',
-            label='background (%.0f)' % np.nanmean(seg_b[3]))
-    ax.axhline(0, color='k', lw=0.8)
-    ax.set_xlabel('Distance along shelf-break segment (km, SW to NE)')
-    ax.set_ylabel("Momentum flux (cm$^2$ s$^{-2}$)")
-    ax.grid(alpha=0.4)
-    ax.legend(title='segment means (cm$^2$s$^{-2}$)')
-    ax.set_title('(d) Eddy vs background along the segment')
+    profile_panel(axs[1, 1], seg_e, seg_b,
+                  '(d) Eddy vs background along the segment (%.1fx mask)'
+                  % dec['mask_scale'])
+    profile_panel(axs[2, 0], seg_e25, seg_b25,
+                  '(e) Eddy vs background along the segment (%.1fx mask: velocity halo)'
+                  % dec25['mask_scale'])
 
     fig.suptitle('Momentum flux decomposition: eddy vs background — '
                  'Long Bay, SC (data2)\n%s' % tag,
