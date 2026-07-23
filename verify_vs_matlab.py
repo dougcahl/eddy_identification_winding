@@ -19,7 +19,7 @@ if not os.path.isdir('data') and os.path.isdir(os.path.join('..', 'data')):
     os.chdir('..')
 
 ml_dir = sys.argv[1] if len(sys.argv) > 1 else \
-    r'D:\sync\hf\eddy_identification_winding\data\results'
+    os.path.join('data', 'results')
 
 KEYS = ['eddy_center_lat', 'eddy_center_lon', 'eddy_dir', 'eddy_streamlines',
         'eddy_length_x', 'eddy_length_y', 'eddy_ellipse_theta']
