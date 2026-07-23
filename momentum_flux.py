@@ -182,17 +182,34 @@ def eddy_background_decomposition(lons, lats, u, v, time_datenum, bearing_deg,
 
     Uses the per-timestep identification results (the fitted ellipses, scaled
     by mask_scale since an eddy's velocity signature extends beyond its
-    winding core) to build an inside-eddy mask for every timestep. The time
-    sum of u'v' is then split exactly:
+    winding core) to build an inside-eddy mask for every timestep.
+
+    Two partitions of the total flux are returned.
+
+    (1) Two-way split against the FULL-RECORD mean (u', v' global):
 
         <u'v'>_total = <u'v'>_eddy + <u'v'>_background
 
-    where each part is the sum of instantaneous u'v' over the timesteps the
-    point is inside / outside any eddy footprint, divided by the total number
-    of valid timesteps. u', v' remain defined against the full-record mean.
+    the sums of instantaneous u'v' over inside- / outside-footprint
+    timesteps, divided by the number of valid timesteps. CAUTION: these two
+    curves share the between-class mean-shift term below (with weights
+    f(1-f)^2 and f^2(1-f)), so they are correlated BY CONSTRUCTION —
+    especially on short records with a single dominant eddy.
 
-    Returns dict with flux_total, flux_eddy, flux_background (cm^2 s^-2) and
-    occupancy (fraction of timesteps inside an eddy footprint).
+    (2) Three-term between/within covariance partition (f = occupancy,
+    class means/covariances computed within each class):
+
+        <u'v'>_total = f*cov_eddy + (1-f)*cov_bg + f(1-f)*du*dv
+
+    where du, dv are the differences between the eddy-time and
+    background-time mean velocities (rotated components). The mean-shift
+    term f(1-f)*du*dv is the flux carried by the eddy displacing the local
+    mean flow; the within-class terms are free of that leakage and are the
+    cleanest 'eddy' vs 'background' comparison.
+
+    Returns dict with flux_total, flux_eddy, flux_background,
+    flux_within_eddy, flux_within_background, flux_mean_shift (cm^2 s^-2)
+    and occupancy.
     """
     from results_io import load_ident_nc
 
@@ -244,12 +261,34 @@ def eddy_background_decomposition(lons, lats, u, v, time_datenum, bearing_deg,
         flux_bg = np.where(valid & ~inside, s, 0.0).sum(axis=2) / nvalid * 1e4
         occupancy = (valid & inside).sum(axis=2) / nvalid
 
+        # three-term between/within partition (class means and covariances)
+        IN = valid & inside
+        OUT = valid & ~inside
+
+        def _cmean(x, m):
+            n = m.sum(axis=2).astype(float)
+            n[n == 0] = np.nan
+            return np.where(m, np.nan_to_num(x), 0.0).sum(axis=2) / n
+
+        ui, vi = _cmean(uc, IN), _cmean(va, IN)
+        uo, vo = _cmean(uc, OUT), _cmean(va, OUT)
+        cov_in = _cmean(uc * va, IN) - ui * vi
+        cov_out = _cmean(uc * va, OUT) - uo * vo
+        f = occupancy
+        flux_within_eddy = f * cov_in * 1e4
+        flux_within_bg = (1 - f) * cov_out * 1e4
+        flux_mean_shift = f * (1 - f) * (ui - uo) * (vi - vo) * 1e4
+
     enough = np.isfinite(nvalid) & (np.nan_to_num(nvalid) >= min_valid_frac * nt)
-    for arr in (flux_total, flux_eddy, flux_bg, occupancy):
+    for arr in (flux_total, flux_eddy, flux_bg, occupancy,
+                flux_within_eddy, flux_within_bg, flux_mean_shift):
         arr[~enough] = np.nan
 
     return {'flux_total': flux_total, 'flux_eddy': flux_eddy,
             'flux_background': flux_bg, 'occupancy': occupancy,
+            'flux_within_eddy': flux_within_eddy,
+            'flux_within_background': flux_within_bg,
+            'flux_mean_shift': flux_mean_shift,
             'mask_scale': mask_scale, 'bearing_deg': float(bearing_deg)}
 
 
@@ -452,6 +491,10 @@ if __name__ == '__main__':
           % (np.nanmean(seg[3]), np.nanmean(seg_e[3]), np.nanmean(seg_b[3])))
     print('segment means (2.5x): total %.1f = eddy %.1f + background %.1f cm2/s2'
           % (np.nanmean(seg[3]), np.nanmean(seg_e25[3]), np.nanmean(seg_b25[3])))
+    for name in ('flux_within_eddy', 'flux_within_background', 'flux_mean_shift'):
+        sp3 = segment_profile(lons, lats, dec25[name], P1, P2)
+        print('  3-term (2.5x) %-24s segment mean %6.1f cm2/s2'
+              % (name, np.nanmean(sp3[3])))
 
     def profile_panel(ax, se, sb, ttl):
         ax.plot(seg[2], seg[3], 'k.-', label='total (%.0f)' % np.nanmean(seg[3]))
