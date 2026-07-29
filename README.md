@@ -39,8 +39,37 @@ For bathymetry and coastline in the figures, put the ETOPO1 binary
 `etopo1_ice_g_i2.bin` in `etopo1/` or `m_map/etopo1/` (the same file m_map
 uses); without it, figures simply skip those layers.
 
+## Download HF radar currents (ERDDAP)
+
+`eddy_hfr.py` downloads HFRNet RTV surface currents from NOAA CoastWatch
+ERDDAP and runs the full pipeline (identification → tracking → analysis) in
+one command:
+
+```
+python eddy_hfr.py --dataset ucsdHfrW6 --start 2026-07-25 --end 2026-07-27 --bbox -125 -120.5 33.5 38.5
+```
+
+- Datasets: `ucsdHfrE1/E2/E6` (US East + Gulf, hourly RTV at 1/2/6 km) and
+  `ucsdHfrW1/W2/W6` (US West), or presets `USEGC`/`USWC` with `--res`.
+- The ERDDAP RTV datasets keep a **rolling ~3-month near-real-time window**;
+  older requests fail with an empty-subset message. (The original HFRNet
+  THREDDS server, hfrnet-tds.ucsd.edu, is no longer online; an OPeNDAP
+  mirror exists at https://dods.ndbc.noaa.gov/thredds/catalog/hfradar/.)
+- Optional QC: `--max-hdop 1.25` masks vectors with high dilution of
+  precision. Identification parameters scale with resolution automatically
+  (constant ~200 km streamline search window).
+- Outputs use a per-run prefix `hfr_<dataset>_<startdate>` so multiple
+  downloads coexist: input `data/<prefix>.nc`, per-timestep results
+  `data/results/<prefix>_<i>.nc`, tracks `data/results/<prefix>_tracks.nc`,
+  figures `data/results_figs/<prefix>_*` (by default: first/last/busiest
+  timestep detection maps + track map + histograms; `--figs all|none`).
+- `hfr_download.py` can also be used standalone to just fetch data in the
+  toolbox's input format.
+
 ## Files
 
+- `eddy_hfr.py` — download HFRNet currents from ERDDAP and run the full pipeline
+- `hfr_download.py` — ERDDAP download + conversion to the toolbox input schema
 - `eddy_uvdata.py` — single-file example driver (your own lon/lat/u/v data or a netcdf file)
 - `eddy_uvdata_loop.py` — multi-timestep identification, parallel over CPU cores
 - `eddy_tracking.py` — eddy tracking with the Cahl 2023 ellipse/inpolygon continuation test
