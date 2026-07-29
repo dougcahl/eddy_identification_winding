@@ -251,3 +251,31 @@ up to ~10% relative on individual eddies but ≲ 10⁻⁴ deg/s absolute, smalle
 than the MATLAB↔Python interpolant difference. Set `params['fast_omega'] = 0`
 for per-window interpolation (~50 s/timestep) that matches the pure-Python
 baseline bit-exactly.
+
+---
+
+# Live download example (v2.2)
+
+Verification run of the ERDDAP download + pipeline on the US West Coast 6 km
+dataset — one command, from raw web data to eddy tracks:
+
+```
+python eddy_hfr.py --dataset ucsdHfrW6 --start 2026-07-25 --end 2026-07-27 --bbox -125 -120.5 33.5 38.5
+```
+
+| Quantity | Value |
+|---|---|
+| Download | ucsdHfrW6 (hourly RTV), central/southern California, 49 timesteps, 73×94 grid, 46% mean radar coverage |
+| Identification | 158 eddies across 49 timesteps (max 10 in one timestep), 21 s on 14 cores |
+| Tracking | 99 tracks (raw unfiltered hourly RTV — most are brief small features), longest 9 h |
+
+The busiest timestep (2026-07-26 17:00 UTC, 10 detections) — a 22-streamline
+cyclone off Monterey Bay; eddies with fewer than 6 streamlines are kept in the
+results but not drawn:
+
+![Busiest timestep of the live test: Monterey Bay cyclone](docs/hfr_test_busiest.png)
+
+Eddy tracks of 6+ hours (raw hourly RTV is noisy; low-pass filter the currents
+for serious tracking work, as in the thesis analysis):
+
+![Track map from the live test](docs/hfr_test_tracks.png)
